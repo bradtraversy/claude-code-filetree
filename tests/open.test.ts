@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { herdrError, herdrOpenCommand, herdrPane, openCommand, openWithCommand, tmuxOpenCommand, TMUX_OPEN } from '../hooks/open'
+import { herdrError, herdrOpenCommand, herdrPane, isBinaryPath, openCommand, openWithCommand, tmuxOpenCommand, TMUX_OPEN } from '../hooks/open'
 
 test('inside tmux, open hands the file to the tmux opener with the editor and its folder', () => {
   const { argv } = tmuxOpenCommand('nvim', '/work/A & B/dax.ts')
@@ -73,4 +73,9 @@ test('herdr replies: the pane id comes from the split JSON and a failure message
   expect(herdrError('{"error":{"code":"pane_not_found","message":"pane w1:p35 not found"},"id":"cli:pane:split"}\n')).toBe('pane w1:p35 not found')
   expect(herdrError('error: unexpected argument\nUsage: herdr pane split')).toBe('error: unexpected argument')
   expect(herdrError('')).toBe('')
+})
+
+test('binary files are told apart by extension, in any case, on both path styles; code, text and dotfiles are not', () => {
+  for (const p of ['/a/logo.PNG', '/a/b.c/clip.mov', 'C:\\\\Docs\\\\spec.pdf', '/a/font.woff2', '/a/build.tar.gz', '/a/app.dmg']) expect(isBinaryPath(p)).toBe(true)
+  for (const p of ['/a/index.ts', '/a/icon.svg', '/a/README', '/a/.env', '/a/.png', '/a/notes.md', '/a/a.b/Makefile', '/a/png']) expect(isBinaryPath(p)).toBe(false)
 })

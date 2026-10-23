@@ -134,3 +134,20 @@ export function openWithCommand(command: string, path: string, dir: string, line
   const filled = argv.map(w => w.replace(/\{(path|dir|line)\}/g, (_, key) => (key === 'path' ? path : key === 'dir' ? dir : String(line))))
   return argv.some(w => w.includes('{path}')) ? filled : [...filled, path]
 }
+
+const BINARY_EXTENSIONS = new Set([
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'icns', 'tif', 'tiff', 'heic', 'heif', 'avif', 'psd', 'ai', 'sketch', 'fig', 'raw', 'cr2', 'nef', 'dng',
+  'mp3', 'wav', 'flac', 'aac', 'ogg', 'oga', 'm4a', 'wma', 'aif', 'aiff', 'opus',
+  'mp4', 'm4v', 'mov', 'mkv', 'avi', 'webm', 'wmv', 'flv', 'mpg', 'mpeg',
+  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'key', 'numbers', 'pages', 'odt', 'ods', 'odp', 'epub', 'mobi',
+  'zip', 'tar', 'gz', 'tgz', 'bz2', 'xz', 'zst', '7z', 'rar', 'dmg', 'iso', 'pkg', 'deb', 'rpm', 'msi', 'apk', 'ipa',
+  'ttf', 'otf', 'woff', 'woff2', 'eot',
+  'exe', 'dll', 'so', 'dylib', 'bin', 'o', 'a', 'class', 'jar', 'pyc', 'wasm', 'sqlite', 'sqlite3', 'db', 'parquet',
+])
+
+// A file whose extension names an image, media, document, archive, font or compiled format: not something a code editor shows.
+export function isBinaryPath(path: string): boolean {
+  const name = path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
+  const dot = name.lastIndexOf('.')
+  return dot > 0 && BINARY_EXTENSIONS.has(name.slice(dot + 1).toLowerCase())
+}

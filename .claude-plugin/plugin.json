@@ -104,6 +104,16 @@
       "description": "What a double-click or Enter does with a file. Empty: the default app, also inside tmux. editor: use $VISUAL, then $EDITOR, then vi in tmux or a herdr pane (Linux/macOS only; otherwise shows a notice). preview: show it in the pane (left goes back; ↗ always opens the default app). Anything else is a command run instead: {path} is the file and {dir} its folder; without {path} the path goes last. Words split on spaces, quotes keep a word whole, and no shell runs it. It should start the viewer and return; on Linux it runs detached.",
       "default": ""
     },
+    "binaries": {
+      "type": "string",
+      "title": "Binary files",
+      "description": "What a double-click or Enter does with an image, audio, video, PDF, office document, archive, font or compiled file when Open with names an editor or command. Open with: hand it to the editor or command like any other file. default app: open it in the default app for its type, as if Open with were empty, so a code editor in Open with gets code and the system gets images. The file type comes from its extension; preview is unaffected.",
+      "default": "Open with",
+      "options": [
+        "Open with",
+        "default app"
+      ]
+    },
     "edit": {
       "type": "string",
       "title": "Edit with",

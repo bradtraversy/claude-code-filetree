@@ -1,5 +1,5 @@
 import { type BuiltinToolResults, type EngineInterface, type Register, type Timer, update } from 'claude-code'
-import { herdrError, herdrOpenCommand, herdrPane, LINUX_LAUNCH, openCommand, openWithCommand, tmuxOpenCommand, words } from './open'
+import { herdrError, herdrOpenCommand, herdrPane, isBinaryPath, LINUX_LAUNCH, openCommand, openWithCommand, tmuxOpenCommand, words } from './open'
 import type { ButtonProps } from './button'
 
 import type { Activity, FileNode, FileTree, Theme } from '../types'
@@ -84,6 +84,7 @@ let lastPress = { key: '', at: 0 }
 let noNerd = false
 let glyphSetting = 'auto'
 let openWithSetting = ''
+let binariesInDefaultApp = false
 let editWithSetting = ''
 let diffWithSetting = ''
 let palette: Palette = parsePalette('')
@@ -1085,7 +1086,8 @@ function previewLines(text: string, top: number, rows: number, markdown: boolean
 }
 
 async function openFile($: EngineInterface, path: string, how: { mode?: string; line?: number } = {}): Promise<void> {
-  const mode = (how.mode ?? openWithSetting).trim()
+  const chosen = (how.mode ?? openWithSetting).trim()
+  const mode = how.mode === undefined && binariesInDefaultApp && chosen !== 'preview' && isBinaryPath(path) ? '' : chosen
   if (mode === 'preview') return showPreview($, path)
   const os = await osName($)
   const host = mode === 'editor' ? await editorHost($, os) : ''
@@ -1237,6 +1239,7 @@ export const register: Register = (on, options) => {
   searchGap = options?.spacing !== 'off'
   showShortcuts = options?.shortcuts !== 'off'
   openWithSetting = typeof options?.open === 'string' ? options.open : ''
+  binariesInDefaultApp = options?.binaries === 'default app'
   editWithSetting = typeof options?.edit === 'string' ? options.edit.trim() : ''
   palette = parsePalette(options?.palette)
   diffWithSetting = typeof options?.diff === 'string' ? options.diff.trim() : ''
