@@ -145,7 +145,6 @@ const BINARY_EXTENSIONS = new Set([
   'exe', 'dll', 'so', 'dylib', 'bin', 'o', 'a', 'class', 'jar', 'pyc', 'wasm', 'sqlite', 'sqlite3', 'db', 'parquet',
 ])
 
-// A file whose extension names an image, media, document, archive, font or compiled format: not something a code editor shows.
 export function isBinaryPath(path: string): boolean {
   const name = path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
   const dot = name.lastIndexOf('.')

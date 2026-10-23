@@ -899,23 +899,24 @@ test('open with: a double-click and Enter run the configured command instead of 
   await ui.unmount()
 })
 
-test('binary files: default app sends an image to the default app while code still goes to the Open with editor', { timeoutMs: 20_000, options: { open: 'code -g {path}', binaries: 'default app' } }, async ($, on) => {
+test('binary files: default app sends images and documents to the default app, in any case, while code, dotfiles and SVG still go to the Open with editor', { timeoutMs: 20_000, options: { open: 'code -g {path}', binaries: 'default app' } }, async ($, on) => {
   const ran: Ran = []
   const root = '/Users/k/proj'
-  const clock = world(on, { os: 'darwin', env: { HOME: '/Users/k', TMUX: '/tmp/tmux-501/default,1,0', EDITOR: 'nvim' }, cwd: root, top: '', dirs: { [root]: [['a.ts', 'file'], ['logo.PNG', 'file']] }, status: '', numstat: '' }, ran)
+  const files = ['.env', 'a.ts', 'icon.svg', 'logo.PNG', 'site.tar.gz', 'spec.pdf']
+  const clock = world(on, { os: 'darwin', env: { HOME: '/Users/k', TMUX: '/tmp/tmux-501/default,1,0', EDITOR: 'nvim' }, cwd: root, top: '', dirs: { [root]: files.map(f => [f, 'file']) }, status: '', numstat: '' }, ran)
   await $.session.start({ cwd: root, surface: 'terminal', isInteractive: true })
   await clock.settle()
   const ui = await $.ui.mount({ plugin: 'filetree', surface: 'terminal', component: 'Pane', requestId: 'filetree', props: paneProps(60) })
-  await ui.post({ press: `${root}/a.ts` }, { in: 'rows' })
-  await ui.post({ press: `${root}/a.ts` }, { in: 'rows' })
+  await ui.post({ press: `${root}/${files[0]}` }, { in: 'rows' })
+  await ui.post({ press: `${root}/${files[0]}` }, { in: 'rows' })
   await clock.settle()
-  expect(ran).toContainEqual(['code', '-g', `${root}/a.ts`])
-  expect(ran.some(a => a[0] === 'open')).toBe(false)
-  await ui.post({ key: 'down' }, { in: 'rows' })
-  await ui.post({ key: 'return' }, { in: 'rows' })
-  await clock.settle()
-  expect(ran).toContainEqual(['open', '--', `${root}/logo.PNG`])
-  expect(ran.filter(a => a[0] === 'code')).toHaveLength(1)
+  for (const f of files.slice(1)) {
+    await ui.post({ key: 'down' }, { in: 'rows' })
+    await ui.post({ key: 'return' }, { in: 'rows' })
+    await clock.settle()
+  }
+  expect(ran.filter(a => a[0] === 'code').map(a => a[2])).toEqual([`${root}/.env`, `${root}/a.ts`, `${root}/icon.svg`])
+  expect(ran.filter(a => a[0] === 'open').map(a => a[2])).toEqual([`${root}/logo.PNG`, `${root}/site.tar.gz`, `${root}/spec.pdf`])
   expect(ran.some(a => a.includes('nvim'))).toBe(false)
   await ui.unmount()
 })
